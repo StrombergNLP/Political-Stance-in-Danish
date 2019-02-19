@@ -1,0 +1,156 @@
+session.get(
+        'https://login.infomedia.dk/Login/AutologinRedirect?appName=InsightWebMs',
+        data={
+            'Upgrade-Insecure-Requests: 1',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Referer: https://login.infomedia.dk/?returnUrl=https%3a%2f%2fapps.infomedia.dk%3a443%2fmediearkiv%2f&appname=InsightWebMs',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: Insight.Login.SessionId=33apsrsm42ld2nqvizwe1f0u; Insight.Lang.Referrer=https://apps.infomedia.dk/mediearkiv'
+    })
+
+    session.get(
+        'http://autologin.infomedia.dk/mediearkiv',
+        data={
+            'Upgrade-Insecure-Requests: 1',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Encoding: gzip, deflate',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6'
+        })
+
+    session.get(
+        'https://login.infomedia.dk/Login/LoginByToken?token=C8D0896DDAE5EE22CB89654AF1760EB58DF730377FC5E268EF74EDE16A240E83443F3C3669B257CC81C451147DEFE520B079B757DF83C556&returnUrl=https://apps.infomedia.dk/mediearkiv',
+        data={
+            'Upgrade-Insecure-Requests: 1',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Referer: https://login.infomedia.dk/?returnUrl=https%3a%2f%2fapps.infomedia.dk%3a443%2fmediearkiv%2f&appname=InsightWebMs',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: Insight.Login.SessionId=33apsrsm42ld2nqvizwe1f0u; Insight.Lang.Referrer=https://apps.infomedia.dk/mediearkiv'
+    })
+
+    session.get(
+        'https://apps.infomedia.dk/mediearkiv?usertoken=C8D0896DDAE5EE22CB89654AF1760EB58DF730377FC5E268EF74EDE16A240E83443F3C3669B257CC81C451147DEFE520B079B757DF83C556&timestamp=2019-02-07T17%3a18%3a45Z&token=kWMMfGTHjAG07pMCdvuBYLofkerBbxaAgR2AqObl7OU%3d',
+        data={
+            'Upgrade-Insecure-Requests: 1',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Referer: https://login.infomedia.dk/?returnUrl=https%3a%2f%2fapps.infomedia.dk%3a443%2fmediearkiv%2f&appname=InsightWebMs',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: gsScrollPos-387=0; Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+    })
+
+    session.get(
+        'https://apps.infomedia.dk/mediearkiv',
+        data={
+            'Upgrade-Insecure-Requests: 1',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Referer: https://login.infomedia.dk/?returnUrl=https%3a%2f%2fapps.infomedia.dk%3a443%2fmediearkiv%2f&appname=InsightWebMs',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: gsScrollPos-387=0; Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+        })
+
+    tempStdData = {
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+        'Accept: text/css,*/*;q=0.1',
+        'Referer: https://apps.infomedia.dk/mediearkiv',
+        'Accept-Encoding: gzip, deflate, br',
+        'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+        'Cookie: Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+    }
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/Content/style_site?v=10_MjWe3embveLUu5806-J6_86zXqGH-w52HuSTQhqQ1',
+        data=tempStdData)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/Content/Ms/style_ms?v=VTF0UzGqphvjcAtv-gI5hYfveSR8IYrwGQAwqhShpfE1',
+        data=tempStdData)
+
+    tempStdData2 = {
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+        'Accept: */*',
+        'Referer: https://apps.infomedia.dk/mediearkiv',
+        'Accept-Encoding: gzip, deflate, br',
+        'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+        'Cookie: Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+    }
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/modernizr?v=UooaGKDXuIOIxNUfPYCJGaUiP2PSEra9R-G4bfdw0rU1',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/adrum?v=Ayb7A1BtDMq0VZo96Y4LM1y-ecwIXBnuOXxGd4YiaXc1',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/adrum?v=Ayb7A1BtDMq0VZo96Y4LM1y-ecwIXBnuOXxGd4YiaXc1',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/thirdparty_all?v=qAJ8m2WWp0pQJ_QxGSPxHZXvKasPBxFzPAyxMUtprcg1',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/globalize_culture_en?v=FaPkVzv464SwnHy7sJjrYgt01EAe6TolZG4pTflhRb81',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/mediearkiv/lang/js?locale=en-US',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/app?v=JNYMdyxpo5Qd3XfCVcv_qnmtCY5zWa4udozGJgUEgTs1',
+        data=tempStdData2)
+
+    session.get(
+        'https://apps.infomedia.dk/MedieArkiv/bundles/search?v=8a2vF0WL_Mv_zong2qWziZo9jZaQ973PkmayNXS6cZI1',
+        data=tempStdData2)
+
+    session.post(
+        'https://apps.infomedia.dk/mediearkiv/media/allmedia',
+        data={
+            'Accept: application/json, text/javascript, */*; q=0.01',
+            'Origin: https://apps.infomedia.dk',
+            'X-Requested-With: XMLHttpRequest',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Content-Type: application/json; charset=utf-8',
+            'Referer: https://apps.infomedia.dk/mediearkiv',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: gsScrollPos-387=0; Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+        })
+
+    session.get(
+        'https://apps.infomedia.dk/mediearkiv/projectid',
+        data={
+            'Accept: application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With: XMLHttpRequest',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Content-Type: application/json; charset=utf-8',
+            'Referer: https://apps.infomedia.dk/mediearkiv',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: gsScrollPos-387=0; Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+        })
+
+    test = session.post(
+        'https://apps.infomedia.dk/mediearkiv/settings/getusersettings',
+        data={
+            'Accept: application/json, text/javascript, */*; q=0.01',
+            'Origin: https://apps.infomedia.dk',
+            'X-Requested-With: XMLHttpRequest',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+            'Content-Type: application/json; charset=utf-8',
+            'Referer: https://apps.infomedia.dk/mediearkiv',
+            'Accept-Encoding: gzip, deflate, br',
+            'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
+            'Cookie: gsScrollPos-387=0; Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
+        })
