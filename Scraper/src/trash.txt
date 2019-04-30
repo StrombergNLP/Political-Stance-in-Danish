@@ -154,3 +154,30 @@ session.get(
             'Accept-Language: en-US,en;q=0.9,da-DK;q=0.8,da;q=0.7,sv;q=0.6',
             'Cookie: gsScrollPos-387=0; Insight.Web.Ms.SessionId=wlglnuxx3o0nqjtxs5vtztnz'
         })
+
+
+class Quote:
+    def __init__(self, quoteID, text, topic, subTopic, politician, party, label):
+        self.quoteID = quoteID
+        # Removal of non-letter characters, lower-casing and stripping of leading and trailing whitespace
+        self.text = re.sub("[^a-zA-Z]", " ", text).lower().strip()
+        self.topic = topic
+        self.subTopic = subTopic
+        self.politician = politician
+        self.party = party
+        self.label = label
+
+    def __repr__(self):
+        return "%d\t%s\t%s\t%s\t%s\t%s\t%s" % (self.quoteID, self.text, self.topic, self.subTopic, self.politician,
+                                               self.party, self.label)
+
+
+def parseData(rawQuotes):
+    print('Parsing data from', rawQuotes)
+    quotes = list()
+    inFile = pd.read_csv('../Resources/parsedQuotes/' + rawQuotes, sep=';', encoding='UTF-16', header=0, quoting=1)
+    # Drop quotes identified as false positives from data
+    inFile = inFile.dropna()
+    inFile.apply(lambda x: quotes.append(Quote(int(x['quoteID']), x['quote'], x['topic'], x['subTopic'],
+                                               x['politician'], x['party'], x['fan'])), axis=1)
+    return quotes
