@@ -15,9 +15,9 @@ embSizeVar = [300, 372]  # 300 sentence embeddings, 63 politician embeddings and
 LSTMLayersVar = [1]
 LSTMDimsVar = [200]
 ReLuLayersVar = [1]
-ReLuDimsVar = [100]
-epochsVar = [70]# [30, 50, 70] Also test 300
-L2Var = [0.0]
+ReLuDimsVar = [100, 200]
+epochsVar = [200]# [30, 50, 70] Also test 300
+L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
 
 
