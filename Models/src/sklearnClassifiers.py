@@ -3,7 +3,6 @@ from sklearn.naive_bayes import GaussianNB
 
 import numpy as np
 
-# https://chrisalbon.com/machine_learning/trees_and_forests/random_forest_classifier_example/
 fullDataPath = '../resources/fullDataset/'
 polSubsetPath = '../resources/nationalPolicy/'
 
@@ -54,6 +53,6 @@ def test(model, path):
         testData = [x[:-1] for x in testData]
         return list(model.predict(testData)), classLabels
 
-
-run(polSubsetPath, 'randomForest')
+# randomForest or GNB
+run(polSubsetPath, 'GNB')
 

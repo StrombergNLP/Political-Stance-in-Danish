@@ -2,14 +2,14 @@ import nltk
 import pandas as pd
 
 
-def preprocessQuotes(rawQuotes, genSubset):
+def preprocessQuotes(rawQuotes, polSubset, avgEmbeddings):
     global w2vmodel
     w2vmodel = {}
     loadModel()
     inFile = pd.read_csv('../Resources/parsedQuotes/' + rawQuotes, sep=';', encoding='UTF-16', header=0, quoting=1)
     # Drop quotes identified as false positives from data
     inFile = inFile.dropna()
-    if genSubset:
+    if polSubset:
         inFile = inFile[inFile['subTopic'] == 'p']
 
     with open('../out/featurevecs.txt', 'w', encoding='utf-8') as outFile:
@@ -18,9 +18,19 @@ def preprocessQuotes(rawQuotes, genSubset):
             fanMap = {x.split(';')[0]: x.split(';')[1].replace('\n', '') for x in fanVec}
             for index, row in inFile.iterrows():
                 quoteTokens = nltk.word_tokenize(row['quote'])
-                embeddedQuote = embedTokens(quoteTokens)
-                finalVec = embeddedQuote + genFeatureVec(row) + [int(fanMap[row['fan']])]
-                outFile.write(str(finalVec)+'\n')
+                if avgEmbeddings:
+                    embeddedQuote = quote2AvgVec(quoteTokens)
+                    finalVec = embeddedQuote + genFeatureVec(row) + [int(fanMap[row['fan']])]
+                    outFile.write(str(finalVec)+'\n')
+                else:
+                    embeddedQuote = quote2vec(quoteTokens)
+                    featureVec = [0.0]*300
+                    polPartyVec = genFeatureVec(row)
+                    for i in range(len(polPartyVec)):
+                        featureVec[i] = polPartyVec[i]
+                    finalVec = [featureVec] + embeddedQuote + [[int(fanMap[row['fan']])]]
+                    outFile.write(str(finalVec)+'\n')
+
 
 
 def loadModel():
@@ -31,7 +41,7 @@ def loadModel():
             w2vmodel.update({line[0]: line[1]})
 
 
-def embedTokens(quoteTokens):
+def quote2AvgVec(quoteTokens):
     global w2vmodel
     # Embeddings of size 300
     emb = [0.0]*300
@@ -40,10 +50,21 @@ def embedTokens(quoteTokens):
     for word in quoteTokens:
         if word in w2vmodel:
             n = n + 1
-            test = w2vmodel[word].split(', ')
-            vector = [float(i) for i in test]
+            wordEmb = w2vmodel[word].split(', ')
+            vector = [float(i) for i in wordEmb]
             emb = [x + y for x, y in zip(emb, vector)]
     return [x / n for x in emb]
+
+
+def quote2vec(quoteTokens):
+    global w2vmodel
+    quoteEmb = []
+    for word in quoteTokens:
+        if word in w2vmodel:
+            wordEmb = w2vmodel[word].split(', ')
+            vector = [float(i) for i in wordEmb]
+            quoteEmb.append(vector)
+    return quoteEmb
 
 
 def genFeatureVec(quoteVec):
@@ -85,31 +106,39 @@ def generateModelSubset():
     pd.DataFrame(wordsWOembeddings).to_csv('../resources/missingEmbeddings.csv', encoding='utf-8')
 
 
-def splitTrainingTestData():
+def splitTrainingTestData(avgEmbeddings):
     with open('../out/featurevecs.txt', 'r', encoding='utf-8') as inFile:
         vectors = [x.replace('\n', '').split(', ') for x in inFile.readlines()]
         # Splitting feature vectors into training and test set, with 80 % in training and 20 % in test
         trainSet = vectors[:int(vectors.__len__()*0.8)]
         testSet = vectors[int(vectors.__len__()*0.8):]
         print('TrainSet size: {}\tTestSet size: {}'.format(trainSet.__len__(), testSet.__len__()))
-        with open('../out/trainData.txt', 'w', encoding='utf-8') as outFile:
-            for vector in trainSet:
-                outFile.write(str(vector).replace('[\'', '').replace(']\'', '').replace('\'', '')+'\n')
-        with open('../out/testData.txt', 'w', encoding='utf-8') as outFile:
-            for vector in testSet:
-                outFile.write(str(vector).replace('[\'', '').replace(']\'', '').replace('\'', '')+'\n')
+        if avgEmbeddings:
+            with open('../out/trainData.txt', 'w', encoding='utf-8') as outFile:
+                for vector in trainSet:
+                    outFile.write(str(vector).replace('[\'', '').replace(']\'', '').replace('\'', '')+'\n')
+            with open('../out/testData.txt', 'w', encoding='utf-8') as outFile:
+                for vector in testSet:
+                    outFile.write(str(vector).replace('[\'', '').replace(']\'', '').replace('\'', '')+'\n')
+        else:
+            with open('../out/trainData.txt', 'w', encoding='utf-8') as outFile:
+                for vector in trainSet:
+                    outFile.write(str(vector) + '\n')
+            with open('../out/testData.txt', 'w', encoding='utf-8') as outFile:
+                for vector in testSet:
+                    outFile.write(str(vector) + '\n')
 
 
-def genPoliticsSubset():
-    preprocessQuotes('quote_db.csv', True)
-    splitTrainingTestData()
+def genPoliticsSubset(avgEmbeddings):
+    preprocessQuotes('quote_db.csv', True, False)
+    splitTrainingTestData(avgEmbeddings)
 
 
-def genFullDataset():
-    preprocessQuotes('quote_db.csv', False)
-    splitTrainingTestData()
+def genFullDataset(avgEmbeddings):
+    preprocessQuotes('quote_db.csv', False, False)
+    splitTrainingTestData(avgEmbeddings)
 
 
-genPoliticsSubset()
+genPoliticsSubset(avgEmbeddings=False)
 
 #generateModelSubset()
