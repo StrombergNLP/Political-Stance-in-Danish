@@ -5,10 +5,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 import collections
 import sklearn.metrics as sk
+import os
 
-
-avgFullDataPath = '../resources/avgQuote2Vec/fullDataset/'
-avgPolSubsetPath = '../resources/avgQuote2Vec/nationalPolicy/'
+filePath = os.path.dirname(__file__)
+avgFullDataPath = os.path.join(filePath, '../resources/avgQuote2Vec/fullDataset/')
+avgPolSubsetPath = os.path.join(filePath, '../resources/avgQuote2Vec/nationalPolicy/')
+fullDataPath = os.path.join(filePath, '../resources/quote2vec/fullDataset/')
+polSubsetPath = os.path.join(filePath, '../resources/quote2vec/nationalPolicy/')
 
 embSize = 372  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 LSTMLayersVar = [1]
@@ -142,5 +145,5 @@ def LSTMBenchmark(outPath):
                                 outFile.flush()
 
 
-LSTMBenchmark('../out/LSTM_benchmark200Epoch.csv')
+LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmark200Epoch.csv'))
 #run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[2], ReLuDimsVar[1], embSize, 3, L2Var[0], epochsVar[0])

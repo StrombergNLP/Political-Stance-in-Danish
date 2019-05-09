@@ -5,11 +5,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 import collections
 import sklearn.metrics as sk
+import os
 
-avgFullDataPath = '../resources/avgQuote2Vec/fullDataset/'
-avgPolSubsetPath = '../resources/avgQuote2Vec/nationalPolicy/'
-fullDataPath = '../resources/quote2vec/fullDataset/'
-polSubsetPath = '../resources/quote2vec/nationalPolicy/'
+filePath = os.path.dirname(__file__)
+avgFullDataPath = os.path.join(filePath, '../resources/avgQuote2Vec/fullDataset/')
+avgPolSubsetPath = os.path.join(filePath, '../resources/avgQuote2Vec/nationalPolicy/')
+fullDataPath = os.path.join(filePath, '../resources/quote2vec/fullDataset/')
+polSubsetPath = os.path.join(filePath, '../resources/quote2vec/nationalPolicy/')
 
 embSizeVar = [300, 372]  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 LSTMLayersVar = [1]
@@ -163,5 +165,5 @@ def LSTMBenchmark(outPath, avgQuote2Vec):
                                 outFile.flush()
 
 
-LSTMBenchmark('../out/LSTM_benchmarkNoAvg.csv', avgQuote2Vec=False)
+LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
 #run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)
