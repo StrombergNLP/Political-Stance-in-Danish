@@ -155,7 +155,7 @@ def runFullBenchmark():
             for ReLULayer in ReLuLayersVar:
                 for ReLUDim in ReLuDimsVar:
                     for L2 in L2Var:
-                        runSpecificBenchmark(avgFullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim, L2)
+                        runSpecificBenchmark(fullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim, L2)
 
 
 def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2):
@@ -185,6 +185,7 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2):
                 outFile.flush()
 
 
-# runFullBenchmark()
+#runSpecificBenchmark(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], L2Var[0])
+runFullBenchmark()
 # LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
 # run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)
