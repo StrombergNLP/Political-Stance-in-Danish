@@ -21,6 +21,9 @@ def removeArticlesWithoutQuotes(subfolder):
     articleDB.to_csv('../out/' + subfolder + 'clean_article_db.csv', sep=';', encoding='UTF-16', quoting=1, index=0)
 
 
+quoteDB = pd.read_csv('../resources/parsedquotes/quote_db.csv', sep=';', encoding='UTF-16', header=0, quoting=1)
+print(quoteDB.quote.map(lambda x: len(x)).max())
+
 #removeArticlesWithoutQuotes('')
 
-cleanFalsePositiveArticles()
+#cleanFalsePositiveArticles()

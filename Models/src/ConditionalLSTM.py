@@ -15,9 +15,9 @@ polSubsetPath = os.path.join(filePath, '../resources/quote2vec/nationalPolicy/')
 
 embSize = 300  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 noClasses = 3
-LSTMLayersVar = [2]
+LSTMLayersVar = [1]
 LSTMDimsVar = [50, 100, 200]
-ReLuLayersVar = [1, 2, 3]
+ReLuLayersVar = [1, 2]
 ReLuDimsVar = [50, 100, 200]
 epochsVar = [30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
@@ -51,8 +51,9 @@ class LSTM(nn.Module):
         self.hiddenLayers2Labels = nn.Sequential(denseLayers)
 
     def forward(self, quote):
-        lstmOut, self.hiddenLayers = self.lstm(quote.view(len(quote), 1, -1), self.hiddenLayers)
-        labelSpace = self.hiddenLayers2Labels(lstmOut.view(len(quote), -1))
+        for word in quote:
+            lstmOut, self.hiddenLayers = self.lstm(word.view(len(word), 1, -1), self.hiddenLayers)
+        labelSpace = self.hiddenLayers2Labels(lstmOut.view(len(word), -1))
         score = f.log_softmax(labelSpace, dim=1)
         return score
 
@@ -107,8 +108,12 @@ def train(data, model, lossFunction, optimizer, epochs):
             model.zero_grad()
             model.hiddenLayers = model.initializeHiddenLayers()
             target = torch.tensor([label])
+            features = []
             for feature in quote:
-                labelScores = model(torch.tensor([feature]))
+                #labelScores = model(torch.tensor([feature]))
+                features.append([feature])
+            features = torch.tensor(features)
+            labelScores = model(features)
             loss = lossFunction(labelScores, target)
             loss.backward()
             optimizer.step()
@@ -182,3 +187,5 @@ runSpecificBenchmark(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersV
 
 #LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
 #run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)
+
+#12.21 star time

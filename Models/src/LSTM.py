@@ -15,10 +15,10 @@ polSubsetPath = os.path.join(filePath, '../resources/quote2vec/nationalPolicy/')
 
 embSize = 372  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 LSTMLayersVar = [1]
-LSTMDimsVar = [200]
-ReLuLayersVar = [1]
-ReLuDimsVar = [100, 200]
-epochsVar = [200]# [30, 50, 70] Also test 300
+LSTMDimsVar = [50, 100, 200]
+ReLuLayersVar = [1, 2]
+ReLuDimsVar = [50, 100, 200]
+epochsVar = [100]# [30, 50, 70] Also test 300
 L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
 
@@ -75,7 +75,7 @@ def run(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, embSize, noClasses, L2
     testData = loadData(path + 'testData.txt')
     model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims, embSize, noClasses)
     lossFunction = nn.NLLLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=L2)
+    optimizer = optim.SGD(model.parameters(), lr=0.1, weight_decay=L2)
     train(trainingData, model, lossFunction, optimizer, epochs)
     return test(testData, model)
 
