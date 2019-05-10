@@ -19,7 +19,7 @@ LSTMLayersVar = [1]
 LSTMDimsVar = [50, 100, 200]
 ReLuLayersVar = [1, 2]
 ReLuDimsVar = [50, 100, 200]
-epochsVar = [30, 50, 70, 100, 200, 300]
+epochsVar = [1, 30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
 
@@ -112,8 +112,7 @@ def train(data, model, lossFunction, optimizer, epochs):
             for feature in quote:
                 #labelScores = model(torch.tensor([feature]))
                 features.append([feature])
-            features = torch.tensor(features)
-            labelScores = model(features)
+            labelScores = model(torch.tensor(features))
             loss = lossFunction(labelScores, target)
             loss.backward()
             optimizer.step()
@@ -127,8 +126,11 @@ def test(data, model):
     actualLabels = []
     with torch.no_grad():
         for quote, label in data:
+            features = []
             for feature in quote:
-                labelScores = model(torch.tensor([feature]))
+                # labelScores = model(torch.tensor([feature]))
+                features.append([feature])
+            labelScores = model(torch.tensor(features))
             predicted = torch.argmax(labelScores.data, dim=1)
             predictedLabels.extend(predicted.numpy())
             actualLabels.append(label)
