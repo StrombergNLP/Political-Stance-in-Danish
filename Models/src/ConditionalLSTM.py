@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as f
 import torch.optim as optim
 import collections
 import sklearn.metrics as sk
@@ -13,12 +13,13 @@ avgPolSubsetPath = os.path.join(filePath, '../resources/avgQuote2Vec/nationalPol
 fullDataPath = os.path.join(filePath, '../resources/quote2vec/fullDataset/')
 polSubsetPath = os.path.join(filePath, '../resources/quote2vec/nationalPolicy/')
 
-embSizeVar = [300, 372]  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
-LSTMLayersVar = [1]
-LSTMDimsVar = [200]
-ReLuLayersVar = [1]
-ReLuDimsVar = [100, 200]
-epochsVar = [200]# [30, 50, 70] Also test 300
+embSize = 300  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
+noClasses = 3
+LSTMLayersVar = [2]
+LSTMDimsVar = [50, 100, 200]
+ReLuLayersVar = [1, 2, 3]
+ReLuDimsVar = [50, 100, 200]
+epochsVar = [30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
 
@@ -26,14 +27,13 @@ dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
 # Inspired by https://discuss.pytorch.org/t/example-of-many-to-one-lstm/1728/4 and
 # https://pytorch.org/tutorials/beginner/nlp/sequence_models_tutorial.html
 class LSTM(nn.Module):
-    def __init__(self, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, embDims, noLabels):
+    def __init__(self, LSTMLayers, LSTMDims, ReLULayers, ReLUDims):
         super(LSTM, self).__init__()
         self.LSTMLayers = LSTMLayers
         self.LSTMDims = LSTMDims
         self.ReLuLayers = ReLULayers
         self.ReLuDims = ReLUDims
-        self.embDims = embDims
-        self.lstm = nn.LSTM(embDims, LSTMDims, LSTMLayers)
+        self.lstm = nn.LSTM(embSize, LSTMDims, LSTMLayers)
         # Initialize initial hidden state of the LSTM, all values being zero
         self.hiddenLayers = self.initializeHiddenLayers()
 
@@ -47,13 +47,13 @@ class LSTM(nn.Module):
         # Initialize dropout layer
         denseLayers['dropOut'] = nn.Dropout(p=0.5)
         # Final layer mapping from last ReLU layer to labels
-        denseLayers['linear{}'.format(ReLULayers)] = nn.Linear(ReLUDims, noLabels)
+        denseLayers['linear{}'.format(ReLULayers)] = nn.Linear(ReLUDims, noClasses)
         self.hiddenLayers2Labels = nn.Sequential(denseLayers)
 
     def forward(self, quote):
-        lstmOut, self.hidden = self.lstm(quote.view(len(quote), 1, -1), self.hidden)
+        lstmOut, self.hiddenLayers = self.lstm(quote.view(len(quote), 1, -1), self.hiddenLayers)
         labelSpace = self.hiddenLayers2Labels(lstmOut.view(len(quote), -1))
-        score = F.log_softmax(labelSpace, dim=1)
+        score = f.log_softmax(labelSpace, dim=1)
         return score
 
     def initializeHiddenLayers(self):
@@ -84,16 +84,16 @@ def loadVectors(path):
         return data
 
 
-def run(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, noClasses, L2, epochs, avgQuote2Vec):
+def run(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, epochs, avgQuote2Vec):
     lossFunction = nn.NLLLoss()
     if avgQuote2Vec:
         trainingData = loadAvgVectors(path + 'trainData.txt')
         testData = loadAvgVectors(path + 'testData.txt')
-        model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims, embSizeVar[1], noClasses)
+        model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims)
     else:
         trainingData = loadVectors(path + 'trainData.txt')
         testData = loadVectors(path + 'testData.txt')
-        model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims, embSizeVar[0], noClasses)
+        model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims)
     optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=L2)
     train(trainingData, model, lossFunction, optimizer, epochs)
     return test(testData, model)
@@ -105,7 +105,7 @@ def train(data, model, lossFunction, optimizer, epochs):
         for quote, label in data:
             # Clear out gradients and hidden layers
             model.zero_grad()
-            model.hidden = model.initializeHiddenLayers()
+            model.hiddenLayers = model.initializeHiddenLayers()
             target = torch.tensor([label])
             for feature in quote:
                 labelScores = model(torch.tensor([feature]))
@@ -142,28 +142,43 @@ def test(data, model):
     return classAcc, acc, f1
 
 
-def LSTMBenchmark(outPath, avgQuote2Vec):
-    with open(outPath, 'w') as outFile:
+def runFullBenchmark(outPath, avgQuote2Vec):
+    for LSTMLayer in LSTMLayersVar:
+        for LSTMDim in LSTMDimsVar:
+            for ReLULayer in ReLuLayersVar:
+                for ReLUDim in ReLuDimsVar:
+                    for L2 in L2Var:
+                        runSpecificBenchmark(avgFullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim, L2)
+
+
+def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2):
+    lossFunction = nn.NLLLoss()
+    trainingData = loadVectors(path + 'trainData.txt')
+    testData = loadVectors(path + 'testData.txt')
+    model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=L2)
+    with open(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), 'w') as outFile:
         outFile.write("epochs,LSTMLayers,LSTMDims,ReLULayers,ReLUDims,L2,totalAcc,f1,For,Against,Neutral\n")
-        for LSTMLayer in LSTMLayersVar:
-            for LSTMDim in LSTMDimsVar:
-                for ReLULayer in ReLuLayersVar:
-                    for ReLUDim in ReLuDimsVar:
-                        for epoch in epochsVar:
-                            for L2 in L2Var:
-                                if avgQuote2Vec:
-                                    classAcc, totalAcc, f1 = run(avgFullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim,
-                                                                 3, L2, epoch, avgQuote2Vec)
-                                else:
-                                    classAcc, totalAcc, f1 = run(fullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim,
-                                                                 3, L2, epoch, avgQuote2Vec)
-                                outFile.write(
-                                    "%d,%d,%d,%d,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n" %
-                                    (epoch, LSTMLayer, LSTMDim, ReLULayer, ReLUDim, L2, totalAcc, f1, classAcc[0],
-                                     classAcc[1], classAcc[2]))
-                                # Flushing to force write for each test, avoiding lost progress on system failure
-                                outFile.flush()
+        for i in range(len(epochsVar)):
+            if i == 0:
+                train(trainingData, model, lossFunction, optimizer, epochsVar[i])
+                classAcc, totalAcc, f1 = test(testData, model)
+                outFile.write(
+                   "%d,%d,%d,%d,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n" %
+                   (epochsVar[i], LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, totalAcc, f1, classAcc[0],
+                    classAcc[1], classAcc[2]))
+                outFile.flush()
+            else:
+                train(trainingData, model, lossFunction, optimizer, epochsVar[i]-epochsVar[i-1])
+                classAcc, totalAcc, f1 = test(testData, model)
+                outFile.write(
+                    "%d,%d,%d,%d,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n" %
+                    (epochsVar[i], LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, totalAcc, f1, classAcc[0],
+                     classAcc[1], classAcc[2]))
+                outFile.flush()
 
 
-LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
+runSpecificBenchmark(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], L2Var[0])
+
+#LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
 #run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)

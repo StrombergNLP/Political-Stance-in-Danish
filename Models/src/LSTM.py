@@ -35,8 +35,6 @@ class LSTM(nn.Module):
         self.embDims = embDims
         self.lstm = nn.LSTM(embDims, LSTMDims, LSTMLayers)
         # Initialize initial hidden state of the LSTM, all values being zero
-        #self.hiddenLayers = (torch.zeros(self.LSTMLayers, self.LSTMDims),
-        #        torch.zeros(self.LSTMLayers, self.LSTMDims))
         self.hiddenLayers = self.initializeHiddenLayers()
 
         # Initialize linear layers mapping to RelU Layers, and initialize ReLu layers
@@ -53,7 +51,7 @@ class LSTM(nn.Module):
         self.hiddenLayers2Labels = nn.Sequential(denseLayers)
 
     def forward(self, quote):
-        lstmOut, self.hidden = self.lstm(quote.view(len(quote), 1, -1), self.hidden)
+        lstmOut, self.hiddenLayers = self.lstm(quote.view(len(quote), 1, -1), self.hiddenLayers)
         labelSpace = self.hiddenLayers2Labels(lstmOut.view(len(quote), -1))
         score = F.log_softmax(labelSpace, dim=1)
         return score
@@ -88,7 +86,7 @@ def train(data, model, lossFunction, optimizer, epochs):
         for quote, label in data:
             # Clear out gradients and hidden layers
             model.zero_grad()
-            model.hidden = model.initializeHiddenLayers()
+            model.hiddenLayers = model.initializeHiddenLayers()
             inputs = torch.tensor([quote])
             target = torch.tensor([label])
             #target = torch.tensor([labels])
