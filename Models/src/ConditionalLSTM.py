@@ -16,8 +16,8 @@ polSubsetPath = os.path.join(filePath, '../resources/quote2vec/nationalPolicy/')
 embSize = 300  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 noClasses = 3
 LSTMLayersVar = [1]
-LSTMDimsVar = [50, 100, 200]
-ReLuLayersVar = [1, 2]
+LSTMDimsVar = [50]  # missing 100, 200
+ReLuLayersVar = [1]  # missing 2
 ReLuDimsVar = [50, 100, 200]
 epochsVar = [1, 30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
@@ -149,7 +149,7 @@ def test(data, model):
     return classAcc, acc, f1
 
 
-def runFullBenchmark(outPath, avgQuote2Vec):
+def runFullBenchmark():
     for LSTMLayer in LSTMLayersVar:
         for LSTMDim in LSTMDimsVar:
             for ReLULayer in ReLuLayersVar:
@@ -185,9 +185,6 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2):
                 outFile.flush()
 
 
-runSpecificBenchmark(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], L2Var[0])
-
-#LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
-#run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)
-
-#12.21 star time
+# runFullBenchmark()
+# LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
+# run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)
