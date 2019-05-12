@@ -18,7 +18,7 @@ noClasses = 3
 LSTMLayersVar = [1]
 LSTMDimsVar = [50]  # missing 100, 200
 ReLuLayersVar = [1]  # missing 2
-ReLuDimsVar = [50, 100, 200]
+ReLuDimsVar = [50]  # missing 100, 200
 epochsVar = [1, 30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
@@ -150,22 +150,25 @@ def test(data, model):
 
 
 def runFullBenchmark():
+    with open(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), 'w') as outFile:
+            outFile.write("epochs,LSTMLayers,LSTMDims,ReLULayers,ReLUDims,L2,totalAcc,f1,For,Against,Neutral\n")
     for LSTMLayer in LSTMLayersVar:
         for LSTMDim in LSTMDimsVar:
             for ReLULayer in ReLuLayersVar:
                 for ReLUDim in ReLuDimsVar:
                     for L2 in L2Var:
-                        runSpecificBenchmark(fullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim, L2)
+                        runSpecificBenchmark(fullDataPath, LSTMLayer, LSTMDim, ReLULayer, ReLUDim, L2, True)
 
 
-def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2):
+def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, fullRun):
     lossFunction = nn.NLLLoss()
     trainingData = loadVectors(path + 'trainData.txt')
     testData = loadVectors(path + 'testData.txt')
     model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims)
     optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=L2)
-    with open(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), 'w') as outFile:
-        outFile.write("epochs,LSTMLayers,LSTMDims,ReLULayers,ReLUDims,L2,totalAcc,f1,For,Against,Neutral\n")
+    with open(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), 'r+') as outFile:
+        if not fullRun:
+            outFile.write("epochs,LSTMLayers,LSTMDims,ReLULayers,ReLUDims,L2,totalAcc,f1,For,Against,Neutral\n")
         for i in range(len(epochsVar)):
             if i == 0:
                 train(trainingData, model, lossFunction, optimizer, epochsVar[i])
