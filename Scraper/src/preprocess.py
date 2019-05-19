@@ -130,15 +130,15 @@ def splitTrainingTestData(avgEmbeddings):
 
 
 def genPoliticsSubset(avgEmbeddings):
-    preprocessQuotes('quote_db.csv', True, False)
+    preprocessQuotes('quote_db.csv', polSubset=True, avgEmbeddings=avgEmbeddings)
     splitTrainingTestData(avgEmbeddings)
 
 
 def genFullDataset(avgEmbeddings):
-    preprocessQuotes('quote_db.csv', False, False)
+    preprocessQuotes('quote_db.csv', polSubset=False, avgEmbeddings=avgEmbeddings)
     splitTrainingTestData(avgEmbeddings)
 
 
-genPoliticsSubset(avgEmbeddings=False)
+genFullDataset(avgEmbeddings=False)
 
 #generateModelSubset()

@@ -18,7 +18,7 @@ noClasses = 3
 LSTMLayersVar = [1]
 LSTMDimsVar = [100]  # 50 & 200 removed
 ReLuLayersVar = [1]  # 2 removed
-ReLuDimsVar = [50, 100, 200]
+ReLuDimsVar = [50]  # 100, 200 removed
 epochsVar = [1, 30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7, 1.0]
@@ -36,6 +36,7 @@ class LSTM(nn.Module):
         self.lstm = nn.LSTM(embSize, LSTMDims, LSTMLayers)
         # Initialize initial hidden state of the LSTM, all values being zero
         self.hiddenLayers = self.initializeHiddenLayers()
+        print(len(self.hiddenLayers), '\n', self.hiddenLayers)
 
         # Initialize linear layers mapping to RelU Layers, and initialize ReLu layers
         denseLayers = collections.OrderedDict()
@@ -51,6 +52,7 @@ class LSTM(nn.Module):
         self.hiddenLayers2Labels = nn.Sequential(denseLayers)
 
     def forward(self, quote):
+        print(quote.size())
         for word in quote:
             lstmOut, self.hiddenLayers = self.lstm(word.view(len(word), 1, -1), self.hiddenLayers)
         labelSpace = self.hiddenLayers2Labels(lstmOut.view(len(word), -1))
@@ -59,16 +61,6 @@ class LSTM(nn.Module):
 
     def initializeHiddenLayers(self):
         return torch.zeros(self.LSTMLayers, 1,  self.LSTMDims), torch.zeros(self.LSTMLayers, 1, self.LSTMDims)
-
-
-def loadAvgVectors(path):
-    with open(path, 'r', encoding='utf-8') as inFile:
-        data = []
-        for quoteVec in inFile.readlines():
-            quoteVec = quoteVec.replace('\n', '').replace('[', '').replace(']', '').replace(', ', '')
-            quoteVec = [float(i) for i in quoteVec]
-            data.append((quoteVec[:-1], int(quoteVec[-1])))
-        return data
 
 
 def loadVectors(path):
@@ -83,21 +75,6 @@ def loadVectors(path):
                 featureMatrix.append(feature)
             data.append((featureMatrix[:-1], int(featureMatrix[-1][0])))
         return data
-
-
-def run(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, epochs, avgQuote2Vec):
-    lossFunction = nn.NLLLoss()
-    if avgQuote2Vec:
-        trainingData = loadAvgVectors(path + 'trainData.txt')
-        testData = loadAvgVectors(path + 'testData.txt')
-        model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims)
-    else:
-        trainingData = loadVectors(path + 'trainData.txt')
-        testData = loadVectors(path + 'testData.txt')
-        model = LSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims)
-    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=L2)
-    train(trainingData, model, lossFunction, optimizer, epochs)
-    return test(testData, model)
 
 
 def train(data, model, lossFunction, optimizer, epochs):
@@ -187,6 +164,6 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, f
 
 
 runFullBenchmark()
-#runSpecificBenchmark(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], L2Var[1], False)
+# runSpecificBenchmark(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], L2Var[1], False)
 # LSTMBenchmark(os.path.join(filePath, '../out/LSTM_benchmarkNoAvg.csv'), avgQuote2Vec=False)
 # run(fullDataPath, LSTMLayersVar[0], LSTMDimsVar[0], ReLuLayersVar[0], ReLuDimsVar[0], 3, L2Var[0], epochsVar[0], avgQuote2Vec=False)
