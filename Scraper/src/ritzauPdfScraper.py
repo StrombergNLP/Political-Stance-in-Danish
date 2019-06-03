@@ -11,9 +11,13 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 
 
-# Mainly from https://media.readthedocs.org/pdf/pdfminer-docs/latest/pdfminer-docs.pdf
+# Parses a PDF at a given file location, and extracts quotes and raw article text. Politician indicates which politician
+# to extract quotes for, party indicates the party of the politician, topic indicates the topic of the quotes and
+# useEmptyDB indicates whether to append new quotes and articles to already existing datasets or generate new
+# Inspired by https://media.readthedocs.org/pdf/pdfminer-docs/latest/pdfminer-docs.pdf
 def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
     data = ''
+    # Open files containing indications of fillers around quotes, and non-article text
     quoteRelatedFillers = open('../Resources/quoteRelatedFillerWords.txt', 'r', encoding='utf-8').readline().split(',')
     nonArticleFlags = open('../Resources/nonArticleFlags.txt', 'r', encoding='utf-8').readline().split(',')
     quoteFillers = {'-', '»', '«'}
@@ -21,6 +25,10 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
     correctQuoteFlags = set()
     upcomingCorrectQuoteFlags = set()
     politicianLastName = politician.split(' ')[-1]
+
+    # Generate quote fillers to be extracted, flags indicating a quote is by another than the politician of interest,
+    # that the quote is by the politician of interest or that an upcoming quote is of interest, pairing quote fillers,
+    # pronouns and the name of the politician in different combinations
     for filler in quoteRelatedFillers:
         quoteFillers.update([', ' + filler + '.*' + politician + '.*', ', ' + filler + ' hun.*', ', ' + filler +
                              ' han.*', ', ' + filler + '.*' + politicianLastName + '.*'])
@@ -29,9 +37,10 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
         correctQuoteFlags.update([', ' + filler + ' .*' + politician + '.*',
                                   ', ' + filler + ' .*' + politicianLastName + '.*'])
         upcomingCorrectQuoteFlags.update([filler + '[ |,].*' + politician, politician + '[ |,].*' + filler,
-                                          filler + '[ |,].*' + politicianLastName, politicianLastName + '[ |,].*' + filler])
+                                          filler + '[ |,].*' + politicianLastName,
+                                          politicianLastName + '[ |,].*' + filler])
 
-    # Open a PDF file.
+    # Open the indicated PDF file.
     fp = open(fileLocation, 'rb')
     rsrcmgr = PDFResourceManager()
     retstr = io.StringIO()
@@ -53,14 +62,17 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
     articleTitle, articleText, date = '', '', ''
     quoteCount, articleCount, articleID = 0, 0, 0
 
+    # Use empty dataset files
     if useEmptyDB:
         quoteDB = pd.read_csv('../out/empty_db/quote_db.csv', sep=';', encoding='UTF-8', header=0)
         articleDB = pd.read_csv('../out/empty_db/article_db.csv', sep=';', encoding='UTF-8', header=0)
 
+    # Open already present dataset files
     else:
         quoteDB = pd.read_csv('../out/quote_db.csv', sep=';', encoding='UTF-8', header=0)
         articleDB = pd.read_csv('../out/article_db.csv', sep=';', encoding='UTF-8', header=0)
 
+    # Continue from largest article and quote id, if article and/or quote dataset is already populated
     maxArticleID = articleDB['articleID'].max()
     articleID = maxArticleID + 1 if not math.isnan(maxArticleID) else 1
     maxQuoteID = quoteDB['quoteID'].max()
@@ -69,9 +81,11 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
     quoteDicts = []
     articleDicts = []
 
+    # Flags indicating special cases in which quotes might appear
     correctUpcomingQuote = False
     quotesInALine = False
 
+    # Isolate paragraphs
     for paragraph in data.split('\n\n'):
         paragraph = paragraph.replace('\n', ' ')
 
@@ -81,6 +95,7 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
             strpDate = datetime.strptime(date, '%B %d, %Y')
             date = strpDate.strftime('%m/%d/%Y')
 
+        # Skip non-article text
         if any(flag in paragraph for flag in nonArticleFlags) or re.search('\\d+\\W\\d+\\W\\d{4}', paragraph) \
                 or re.search('^\\d+/\\d+$', paragraph) or paragraph == 'København':
             continue
@@ -92,19 +107,20 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
             # Ignore quote if not from politician in question
             wrongQuote = False
             correctQuote = False
-
-            # Eksempel: Kirsten Normann, integration, Støjberg quote der ville inkluderes
             for wrongQuoteFlag in wrongQuoteFlags:
                 if re.search(wrongQuoteFlag, paragraph):
                     wrongQuote = True
+
+                    # Reset flag to avoid false positive indication of quote of interest
                     quotesInALine = False
 
-            # Remove 'fillers' around quotes, such as ', siger Martin Henriksen' and strip whitespace
             if not wrongQuote:
+                # Identify whether quote is of interest
                 for correctQuoteFlag in correctQuoteFlags:
                     if re.search(correctQuoteFlag, paragraph):
                         correctQuote = True
 
+                # Remove 'fillers' around quotes, such as ', siger Martin Henriksen' and strip whitespace
                 if correctQuote or correctUpcomingQuote or quotesInALine:
                     quotesInALine = True
                     for quoteFiller in quoteFillers:
@@ -117,6 +133,7 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
 
         correctUpcomingQuote = False
 
+        # Check if paragraph insinuate an upcoming quote of interest
         for upcomingCorrectQuoteFlag in upcomingCorrectQuoteFlags:
             if re.search(upcomingCorrectQuoteFlag, paragraph):
                 correctUpcomingQuote = True
@@ -124,6 +141,7 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
         if re.search(politician + '.*:$', paragraph.strip()):
             correctUpcomingQuote = True
 
+        # Identify the title of the article
         if newArticle and not re.search('\\d+\\W\\d+\\W\\d{4}', paragraph):
             articleTitle = paragraph
             newArticle = False
@@ -132,9 +150,9 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
         # Construct article string from paragraphs, excluding non-article paragraphs generated during PDF extraction
         articleText += paragraph
 
-        # End of article
+        # End of article indicated with 'The client may distribute'
         if paragraph.startswith('The client may distribute'):
-            # Save quotes with info in quote database
+            # Save quotes with info in quote dataset, and increment quote ID and quote count
             for quote in quotes:
                 quoteDicts.append({'quoteID': quoteID, 'quote': quote, 'politician': politician,
                                    'date': date, 'party': party, 'articleID': articleID.__str__(), 'topic': topic,
@@ -142,16 +160,17 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
                 quoteCount = quoteCount + 1
                 quoteID = quoteID + 1
 
-            # Save article with articleID in article database
-            articleDicts.append({'articleID': articleID, 'topic': topic, 'articleTitle': articleTitle, 'articleText': articleText,
-                                 'mediaOutlet': 'ritzau'})
+            # Save article with articleID in article dataset, and increment article ID and article count
+            articleDicts.append(
+                {'articleID': articleID, 'topic': topic, 'articleTitle': articleTitle, 'articleText': articleText,
+                 'mediaOutlet': 'ritzau'})
+            articleID = articleID + 1
+            articleCount = articleCount + 1
 
+            # Reset article text and quotes in article, and indicate the start of a new article
             newArticle = True
             quotes.clear()
             articleText = ''
-
-            articleID = articleID + 1
-            articleCount = articleCount + 1
 
     # Append newly parsed quotes and articles to exisiting database
     quoteDB = quoteDB.append(pd.DataFrame(quoteDicts), sort=False)
@@ -169,6 +188,7 @@ def parsePDF(fileLocation, politician, party, topic, useEmptyDB):
     articleDB.to_csv('../out/article_db.csv', sep=';', encoding='UTF-8', index=False, quoting=1)
 
 
+# Runs the parsePDF function for each of the files in the integration sub-folder
 def parseIntegration():
     for root, subdir, files in os.walk('../resources/ritzau/integration/'):
         party = root.split('../resources/ritzau/integration/')[1]
@@ -177,29 +197,3 @@ def parseIntegration():
                 politician = file.split('_')[0]
                 print('\'' + root + '/' + file + '\'', politician, party)
                 parsePDF('' + root + '/' + file + '', politician, party, 'integration', False)
-
-
-def parseMartinHenriksen():
-    parsePDF('../resources/ritzau/integration/Dansk Folkeparti/Martin Henriksen_2018.pdf', 'Martin Henriksen',
-             'Dansk Folkeparti', 'immigration', False)
-    # parsePDF('../resources/ritzau/pdfParserTest.pdf', 'Martin Henriksen', 'Dansk Folkeparti')
-
-
-def testParsing():
-    parsePDF('../resources/ritzau/pdfParserTest.pdf', 'Martin Henriksen', 'Dansk Folkeparti', 'immigration', True)
-
-
-def testForDuplication():
-    parsePDF('../resources/ritzau/integration/Radikale Venstre/Morten Østergaard_2018.pdf', 'Morten Østergaard',
-             'Radikale Venstre', 'immigration', True)
-    #parsePDF('../resources/ritzau/integration/Socialistisk Folkeparti/Kirsten Normann_2018.pdf', 'Kirsten Normann',
-    #         'Socialistisk Folkeparti', 'immigration', False)
-
-
-# testForDuplication()
-
-# testParsing()
-
-# parseMartinHenriksen()
-
-parseIntegration()
