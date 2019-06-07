@@ -86,7 +86,7 @@ def loadData(path):
                 feature = feature.replace('[', '').replace(']', '').replace('\'', '').replace('\n', '').split(', ')
                 feature = [float(i) for i in feature]
                 featureMatrix.append(feature)
-            data.append((featureMatrix[:-1], int(featureMatrix[-1][0])))
+            data.append((featureMatrix[:-1], int(featureMatrix[-2][0])))
         return data
 
 

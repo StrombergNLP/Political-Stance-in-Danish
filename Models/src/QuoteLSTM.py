@@ -14,13 +14,13 @@ fullDataPath = os.path.join(filePath, '../resources/avgQuote2Vec/fullDataset/')
 polSubsetPath = os.path.join(filePath, '../resources/avgQuote2Vec/nationalPolicy/')
 
 # Defining hyperparameter space
-embSize = 372  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
+embSize = 373  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 noClasses = 3
 LSTMLayersVar = [1, 2, 3]
 LSTMDimsVar = [50, 100, 200]
 ReLuLayersVar = [1, 2, 3]
 ReLuDimsVar = [50, 100, 200]
-epochsVar = [30, 50, 70, 100, 200, 300]
+epochsVar = [10, 30, 50, 70, 100, 200, 300]
 L2Var = [0.0, 0.0001, 0.0003]
 dropoutVar = [0.0, 0.2, 0.5, 0.7]
 
@@ -87,14 +87,14 @@ def loadData(path):
             quoteVec = quoteVec.replace('[', '').replace(']', '').replace('\'', '')
             quoteVec = quoteVec.split(', ')
             quoteVec = [float(i) for i in quoteVec]
-            data.append((quoteVec[:-1], int(quoteVec[-1])))
+            data.append((quoteVec[:-1], int(quoteVec[-2]), int(quoteVec[-1])))
         return data
 
 
 def train(data, model, lossFunction, optimizer, epochs):
     epochLoss = 0.0
     for epoch in range(epochs):
-        for quote, label in data:
+        for quote, label, quoteID in data:
             # Clear out gradients and hidden state in model
             model.zero_grad()
             model.hiddenState = model.initializeHiddenState()
@@ -119,13 +119,13 @@ def train(data, model, lossFunction, optimizer, epochs):
 def test(data, model):
     predictedLabels = []
     actualLabels = []
+    misClassifications = collections.defaultdict(list)
 
     # Code is run with torch.no_grad(), as the model is not to be trained during testing
     with torch.no_grad():
-        for quote, label in data:
+        for quote, label, quoteID in data:
             # Build tensors for quotes
             inputs = torch.tensor([quote])
-
             # Extract class probability distributions for test data
             labelScores = model(inputs)
 
@@ -133,6 +133,8 @@ def test(data, model):
             predicted = torch.argmax(labelScores.data, dim=1)
             predictedLabels.extend(predicted.numpy())
             actualLabels.append(label)
+            if predicted.item() is not label:
+                misClassifications[(predicted.item(), label)].append(quoteID)
 
     # Generate confusion matrix, and extract evaluation measures using scikit-learn
     cMatrix = sk.confusion_matrix(actualLabels, predictedLabels, labels=[0, 1, 2])
@@ -147,6 +149,7 @@ def test(data, model):
     print("Accuracy: %.5f" % acc)
     print("F1-macro:", f1Macro)
     print("F1-micro:", f1Micro)
+    print(misClassifications)
     return classAcc, f1Micro, f1Macro
 
 
@@ -173,7 +176,7 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, f
     model = QuoteLSTM(LSTMLayers, LSTMDims, ReLULayers, ReLUDims, biDirectional)
 
     # Initialize optimizer and loss function
-    optimizer = optim.SGD(model.parameters(), lr=0.003, weight_decay=L2)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=L2)
     lossFunction = nn.NLLLoss()
 
     if not fullRun:
@@ -199,3 +202,7 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, f
                 (epochsVar[i], LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, f1micro, f1macro, classAcc[0],
                  classAcc[1], classAcc[2]))
             outFile.flush()
+
+
+with open(os.path.join(filePath, '../out/LSTM_benchmark.csv'), 'w') as outFile:
+    runSpecificBenchmark(fullDataPath, 1, 50, 100, 2, 0, False, outFile, False)

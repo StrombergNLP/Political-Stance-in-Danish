@@ -28,9 +28,10 @@ def preprocessQuotes(rawQuotes, polSubset, avgEmbeddings, incPol, incParty):
                 # Tokenize words
                 quoteTokens = nltk.word_tokenize(row['quote'])
                 # Generate average quote embeddings and add to outfile if indicated
+                quoteID = row['quoteID']
                 if avgEmbeddings:
                     embeddedQuote = quote2AvgVec(quoteTokens)
-                    finalVec = embeddedQuote + genFeatureVec(row, incPol, incParty) + [int(fanMap[row['fan']])]
+                    finalVec = embeddedQuote + genFeatureVec(row, incPol, incParty) + [int(fanMap[row['fan']])] + [quoteID]
                     outFile.write(str(finalVec) + '\n')
                 # Generate word vector quote embeddings and add to outfile
                 else:
@@ -42,9 +43,9 @@ def preprocessQuotes(rawQuotes, polSubset, avgEmbeddings, incPol, incParty):
                         polPartyVec = genFeatureVec(row, incPol, incParty)
                         for i in range(len(polPartyVec)):
                             featureVec[i] = polPartyVec[i]
-                        finalVec = [featureVec] + embeddedQuote + [[int(fanMap[row['fan']])]]
+                        finalVec = [featureVec] + embeddedQuote + [[int(fanMap[row['fan']])]] + [[quoteID]]
                     else:
-                        finalVec = embeddedQuote + [[int(fanMap[row['fan']])]]
+                        finalVec = embeddedQuote + [[int(fanMap[row['fan']])]] + [[quoteID]]
                     outFile.write(str(finalVec) + '\n')
 
 
@@ -180,9 +181,13 @@ def genPoliticsSubset(avgEmbeddings, incPol, incParty):
     preprocessQuotes('quote_db.csv', incPol=incPol, incParty=incParty, polSubset=True, avgEmbeddings=avgEmbeddings)
     splitTrainingTestData(avgEmbeddings)
 
+
 # Preprocesses the full quote dataset, generating word embeddings for all quotes, and splits embeddings into test and
 # training data. incPol indicates whether the politician context-based feature is to be included, incParty indicates
 # whether the party context-based feature is to be included
 def genFullDataset(avgEmbeddings, incPol, incParty):
     preprocessQuotes('quote_db.csv', incPol=incPol, incParty=incParty, polSubset=False, avgEmbeddings=avgEmbeddings)
     splitTrainingTestData(avgEmbeddings)
+
+
+genFullDataset(True, True, True)
