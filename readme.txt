@@ -23,6 +23,8 @@ All data folders contain two documents; trainData.txt used for training the mode
 ##Scraper/
 Scraper/ contains all code and resources required for running quote extraction and automated data cleaning on data collected from the Infomedia media archive from the media outlet Ritzau. New data can be downloaded and placed in the folder Scraper\resources\ritzau, from where it can be added to the dataset using the scripts in Scraper\src.
 
+!OBS! All article files are removed from the public version of this repo due to copyright
+
 Scraper/out/ contains the cleaned article and quote datasets in cleadArticleDB.csv and cleadQuoteDB.csv. article_db.csv and quote_db.csv have the same information, but formatted to function best with the scripts in Scraper/src. featurevecs.txt contains the quote dataset converted into feature vectors using the prepreocess.py file in Scraper/src. featurevect.txt is used for generating the test and train subsets using preprocess.py.
 
 Scraper/resources/ contains fanMapping.txt, which maps features in letter format to number format. nonArticleFlags.txt contains text pieces indicating that a given text is not part of an article. quoteRelatedFillerWords.txt contains a list of filler words used to identify quotes in ritzauPdfScraper.py found in Scraper/src/.

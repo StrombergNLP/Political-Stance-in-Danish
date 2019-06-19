@@ -14,7 +14,7 @@ fullDataPath = os.path.join(filePath, '../resources/avgQuote2Vec/fullDataset/')
 polSubsetPath = os.path.join(filePath, '../resources/avgQuote2Vec/nationalPolicy/')
 
 # Defining hyperparameter space
-embSize = 373  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
+embSize = 372  # 300 sentence embeddings, 63 politician embeddings and 9 party embeddings
 noClasses = 3
 LSTMLayersVar = [1, 2, 3]
 LSTMDimsVar = [50, 100, 200]
@@ -87,7 +87,7 @@ def loadData(path):
             quoteVec = quoteVec.replace('[', '').replace(']', '').replace('\'', '')
             quoteVec = quoteVec.split(', ')
             quoteVec = [float(i) for i in quoteVec]
-            data.append((quoteVec[:-1], int(quoteVec[-2]), int(quoteVec[-1])))
+            data.append((quoteVec[:-2], int(quoteVec[-2]), int(quoteVec[-1])))
         return data
 
 
@@ -205,4 +205,4 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, f
 
 
 with open(os.path.join(filePath, '../out/LSTM_benchmark.csv'), 'w') as outFile:
-    runSpecificBenchmark(fullDataPath, 1, 50, 100, 2, 0, False, outFile, False)
+    runSpecificBenchmark(fullDataPath, 1, 100, 2, 50, 0, False, outFile, False)
