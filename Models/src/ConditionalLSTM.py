@@ -201,3 +201,6 @@ def runSpecificBenchmark(path, LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, f
                 (epochsVar[i], LSTMLayers, LSTMDims, ReLULayers, ReLUDims, L2, totalAcc, f1, classAcc[0],
                  classAcc[1], classAcc[2]))
             outFile.flush()
+     
+    with open(os.path.join(filePath, '../out/LSTM_benchmark.csv'), 'w') as outFile:
+        runSpecificBenchmark(fullDataPath, 1, 100, 2, 50, 0, False, outFile)
