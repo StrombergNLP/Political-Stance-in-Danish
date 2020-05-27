@@ -1,11 +1,14 @@
-# Thesis project
-Thesis project by Rasmus Lehmann, written at the IT University of Copenhagen, 2019
+# Political Stance in Danish
+By Rasmus Lehmann, written at the IT University of Copenhagen, 2019
+
+This release is distributed CC-BY 4.0; if you use this content, you must give attribution clearly. For license details, see LICENSE.md. For attribution details, see the end of this document.
 
 The repository is organized as follows:
 
-##Models/
+## Models/
 Models/ contains all code and resources required for running the stance detection models found in Models/src. This
 sub-folder contains the following model files:
+
 - ConditionalLSTM.py
 - QuoteLSTM.py
 - sklearnClassifiers.py
@@ -20,7 +23,7 @@ Within Models/resource/avgQuote2Vec/fullDataset is found additional versions of 
 
 All data folders contain two documents; trainData.txt used for training the models listed above and testData.txt used for testing the models after they are trained.
 
-##Scraper/
+## Scraper/
 Scraper/ contains all code and resources required for running quote extraction and automated data cleaning on data collected from the Infomedia media archive from the media outlet Ritzau. New data can be downloaded and placed in the folder Scraper\resources\ritzau, from where it can be added to the dataset using the scripts in Scraper\src.
 
 !OBS! All article files are removed from the public version of this repo due to copyright
@@ -40,12 +43,14 @@ Scraper/resources/ritzau/ contains the article files from which quotes are scrap
 Scraper/resources/wordEmbeddings/ contains the file daft.vec, which holds a library fastText word embeddings, and filteredModel.csv contains a subset the same library, holding only the words present in a vocabulary generated from the words present in the quotes in the quote dataset.
 
 Scraper/src/ holds the three script files used for preprocessing and quote extraction:
+
 - datasetHelper.py
 - preprocess.py
 - ritzauPdfScraper.py
 
 ## Setup
 Scripts for this project were built using Python 3.7. Running the scripts in this repository requires the following Python libraries:
+
 - Pandas
 - PDFMiner
 - NLTK
@@ -56,14 +61,16 @@ Scripts for this project were built using Python 3.7. Running the scripts in thi
 ## Running Model scripts
 Model scripts are run from the Models\src\ sub-folder.
 
-# ConditionalLSTM.py
+### ConditionalLSTM.py
 The model is used by running one of the following functions:
+
 - runFullBenchmark
 - runSpecificBenchmark
 
 runFullBenchmark generates a model for each hyperparameter combination defined in the script, trains it, and tests its performance, outputting a benchmark file in Models\out\. This model is relatively heavy, and it is therefore recommended to use a small hyperparameter space, or simply run one hyperparameter combination at a time using the runSpecificBenchmark function.
 
 runSpecificBenchmark runs a benchmark for a given hyperparameter combination, and outputs the results in an out-file of the user's choice. The model takes the following arguments, in order:
+
 - path: The path in Models\resources\quote2vec from which data should be used, the paths 'fullDataPath' and 'polSubsetPath' are defined in the script, and can be used as arguments
 - LSTMLayers: The number of desired layers in the generated LSTM model
 - LSTMDims: The number of desired nodes in each of the layers of the generated LSTM model
@@ -73,14 +80,16 @@ runSpecificBenchmark runs a benchmark for a given hyperparameter combination, an
 - fullRun: Whether or not the full hyperparameter space is currently being searched. If the model is called manually, this should always be 'False'
 - outFile: An open out-file in csv format, to which results will be written
 
-# QuoteLSTM.py
+### QuoteLSTM.py
 The model is used by running one of the following functions:
+
 - runFullBenchmark
 - runSpecificBenchmark
 
 runFullBenchmark generates a model for each hyperparameter combination defined in the script, trains it, and tests its performance, outputting a benchmark file in Models\out\. This model is relatively heavy, and it is therefore recommended to use a small hyperparameter space, or simply run one hyperparameter combination at a time using the runSpecificBenchmark function. The model takes a single boolean argument, determining whether the model should be bi-directional.
 
 runSpecificBenchmark runs a benchmark for a given hyperparameter combination, and outputs the results in an out-file of the user's choice. The model takes the following arguments, in order:
+
 - path: The path in Models\resources\avgQuote2vec from which data should be used, the paths 'fullDataPath' and 'polSubsetPath' are defined in the script, and can be used as arguments
 - LSTMLayers: The number of desired layers in the generated LSTM model
 - LSTMDims: The number of desired nodes in each of the layers of the generated LSTM model
@@ -93,14 +102,16 @@ runSpecificBenchmark runs a benchmark for a given hyperparameter combination, an
 
 # sklearnClassifiers.py
 The model is used by running the 'run' function, which takes two parameters:
+
 - path: The path in Models\resources\avgQuote2vec from which data should be used, the paths 'fullDataPath' and 'polSubsetPath' are defined in the script, and can be used as arguments
 - classifierType: Either 'randomForest' if a random forest classifier is desired, or 'GNB' if a Gaussian Naïve Bayes classifier is desired. Any other input will result in an error message.
 
 ## Running Scraper scripts
 Scraper scripts are run from the Scraper\src\ sub-folder.
 
-# datasetHelper.py
+### datasetHelper.py
 The script is used by running one of the two following functions:
+
 - cleanFalsePositiveArticles
 - removeArticlesWithoutQuotes
 
@@ -108,31 +119,38 @@ cleanFalsePositiveArticles removes quotes from articles in the article_db.csv fi
 
 removeArticlesWithoutQuotes removes articles from the article database for which there are no quotes present in the quote database, the two files quote_db.csv, article_db.csv and cleanedArticleDB.csv all found in the Scraper\out\ sub-folder.
 
-# preprocess.py
+### preprocess.py
 The script is generally used by running one of the three following functions:
+
 - genPoliticsSubset
 - genFullDataset
 - generateModelSubset
+
 Six other functions exist within the script, primarily for internal use, but can be of use in generating custom sub-sets for use in testing.
 
 genFullDataset creates feature vectors for the use in the models located at Models\src\, using the full quote dataset located at Scraper\resources\parsedQuotes\, after which the feature vectors are split into a test and a training set. The function takes three parameters:
+
 - avgEmbeddings: Whether embeddings are to be created as an average embedding across a full quote, or as a matrix of word embeddings
 - incPol: Whether the politician one-hot vector context-based feature should be included
 - incParty: Whether the party one-hot vector context-based feature should be included
 
 genPoliticsSubset does the same thing as genFullDataset, but only includes quotes from the subset 'National policy'
+
 - avgEmbeddings: Whether embeddings are to be created as an average embedding across a full quote, or as a matrix of word embeddings
 - incPol: Whether the politician one-hot vector context-based feature should be included
 - incParty: Whether the party one-hot vector context-based feature should be included
 
 generateModelSubset extracts a subset of the word embedding library based on the vocabulary within the quote dataset, and saves that subset
 
-# ritzauPdfScraper.py
+### ritzauPdfScraper.py
+
 The script is used by running one of the two following functions:
+
 - parsePDF
 - parseIntegration
 
 parsePDF parses a PDF at a given file location, and extracts quotes and raw article text, adding them to the quote_db.csv and article_db.csv in Scraper\out\. The method removes non-article text using nonArticleFlags from Scraper\resources\, and removes filler words for quotes using quoteRelatedFillerWords.txt at the same location. The method takes five parameters:
+
 - fileLocation: The file location of the PDF file from which quotes are to be scraped.
 - politician: The politician the script is supposed to look for quotes for
 - party: The party the passed politician is a part of
@@ -140,3 +158,21 @@ parsePDF parses a PDF at a given file location, and extracts quotes and raw arti
 - useEmptyDB: Whether or not an empty dataset file should be used. If so, they are read from Scraper\resources\empty_db\. If not, new quotes and articles are added to the already existing article_db.csv abd quote_db.csv files in Scraper\resources\
 
 parseIntegration runs the parsePDF function for each of the files in the Scraper\resources\ritzau\intagration\ sub-folder
+
+## Acknowledgment
+
+If you use the data or tool here, you must acknowledge it. 
+
+Lehmann, R., & Derczynski, L. (2019). Political Stance in Danish. In Proceedings of the 22nd Nordic Conference on Computational Linguistics (pp. 197-207).
+
+Bibtex:
+```
+@inproceedings{lehmann2019political,
+  title={Political Stance in Danish},
+  author={Lehmann, Rasmus and Derczynski, Leon},
+  booktitle={Proceedings of the 22nd Nordic Conference on Computational Linguistics},
+  pages={197--207},
+  year={2019},
+  publisher={NEALT}
+}
+```
