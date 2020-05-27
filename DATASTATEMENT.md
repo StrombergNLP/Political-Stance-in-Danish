@@ -1,8 +1,8 @@
-# Data Statement for XX
+# Data Statement for PolStance - Political Stance in Danish
 
 Data set name: PolStance
 
-Citation (if available): Lehmann, R., & Derczynski, L. (2019). Political Stance in Danish. In Proceedings of the 22nd Nordic Conference on Computational Linguistics (pp. 197-207).
+Citation (if available): Lehmann, R., & Derczynski, L. (2019). [Political Stance in Danish](https://www.aclweb.org/anthology/W19-6121.pdf). In Proceedings of the 22nd Nordic Conference on Computational Linguistics (pp. 197-207). 
 
 Data set developer(s): Rasmus Lehmann
 
