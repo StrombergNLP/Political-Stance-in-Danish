@@ -1,11 +1,14 @@
 # Political Stance in Danish
 By Rasmus Lehmann, written at the IT University of Copenhagen, 2019
 
+Code and data for automatically detecting the political stance towards various issues from a quote.
+
 This release is distributed CC-BY 4.0; if you use this content, you must give attribution clearly. For license details, see LICENSE.md. For attribution details, see the end of this document.
 
+## Structure
 The repository is organized as follows:
 
-## Models/
+### Models/
 Models/ contains all code and resources required for running the stance detection models found in Models/src. This
 sub-folder contains the following model files:
 
@@ -23,7 +26,7 @@ Within Models/resource/avgQuote2Vec/fullDataset is found additional versions of 
 
 All data folders contain two documents; trainData.txt used for training the models listed above and testData.txt used for testing the models after they are trained.
 
-## Scraper/
+### Scraper/
 Scraper/ contains all code and resources required for running quote extraction and automated data cleaning on data collected from the Infomedia media archive from the media outlet Ritzau. New data can be downloaded and placed in the folder Scraper\resources\ritzau, from where it can be added to the dataset using the scripts in Scraper\src.
 
 !OBS! All article files are removed from the public version of this repo due to copyright
@@ -100,7 +103,7 @@ runSpecificBenchmark runs a benchmark for a given hyperparameter combination, an
 - outFile: An open out-file in csv format, to which results will be written
 - biDirectional: Whether the generated model should be bi-directional
 
-# sklearnClassifiers.py
+### sklearnClassifiers.py
 The model is used by running the 'run' function, which takes two parameters:
 
 - path: The path in Models\resources\avgQuote2vec from which data should be used, the paths 'fullDataPath' and 'polSubsetPath' are defined in the script, and can be used as arguments
